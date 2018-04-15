@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-var port, name, logfile string
+var port, URI, logfile string
 var beginningOfTime = time.Unix(0, 0).Format(time.RFC1123)
 
 // Returns a random int between 0 and 255
@@ -65,7 +65,7 @@ func headerString(r *http.Request) string {
 	// Add each header to the buffer
 	for _, header := range sortedHeaders {
 		headers.WriteString(strings.ToLower(header) + ":")
-		values := strings.Join(r.Header[header], ", ")
+		values := strings.Join(r.Header[header], ",")
 		values = strings.Replace(values, `"`, ``, -1)
 		values = strconv.Quote(values)
 		headers.WriteString(values)
@@ -75,9 +75,8 @@ func headerString(r *http.Request) string {
 	return headers.String()
 }
 
-// returnImage replies to a web request with a unique png image and attempts to prevent caching
-func returnImage(w http.ResponseWriter, r *http.Request) {
-
+// Replies to a web request with a unique png image, attempts to prevent caching, and logs request data
+func handler(w http.ResponseWriter, r *http.Request) {
 	// Delete headers we receive that could allow caching or setting the allowed origin
 	deleteHeaders := []string{"ETag", "If-Modified-Since", "If-Match", "If-None-Match", "If-Range", "If-Unmodified-Since", "Origin"}
 	for _, h := range deleteHeaders {
@@ -100,19 +99,27 @@ func returnImage(w http.ResponseWriter, r *http.Request) {
 	generatePng(buffer)
 	w.Write(buffer.Bytes())
 
+	// Log the request data regardless of expecting the requested path
+	log.Printf("%v %v %v %v %v", remoteAddrIP(r), remoteAddrPort(r), 200, r.URL.String(), headerString(r))
+}
+
+// Replies to an unexpected web request with a 404 and logs request data
+func handlerCatchAll(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(404)
+	fmt.Fprint(w, "404 Not Found")
 	// Log the request data
-	log.Printf("%v %v %v %v", remoteAddrIP(r), remoteAddrPort(r), r.URL.String(), headerString(r))
+	log.Printf("%v %v %v %v %v", remoteAddrIP(r), remoteAddrPort(r), 404, r.URL.String(), headerString(r))
 }
 
 // handleFlags stores the command line argument options
 func handleFlags() {
 	flag.StringVar(&port, "port", "8080", "The port number the web server should listen on")
-	flag.StringVar(&name, "name", "/", `The specific file path and name to listen for
+	flag.StringVar(&URI, "uri", "/", `The URI that returns an image
 Examples:
 	"/" 		= 	Respond to any path or file name (wildcard path and file name)
-	"/jeffxf" 	= 	Only respond to exact match of "/jeffxf"
-	"/jeffxf.png"	= 	Only respond to exact match of "/jeffxf.png"
-	"/jeffxf/" 	= 	Respond to "/jeffxf/" and anything after (wildcard file name)
+	"/recon" 	= 	Only respond to exact match of "/recon"
+	"/recon.png"	= 	Only respond to exact match of "/recon.png"
+	"/recon/" 	= 	Respond to "/recon/" and anything after (wildcard file name)
 `)
 	flag.StringVar(&logfile, "logfile", "recon-headers.log", "The name of the log file")
 	flag.Parse()
@@ -137,12 +144,17 @@ func main() {
 	l := setupLogger(logfile)
 	defer l.Close()
 
-	// If a file name is provided, ensure it starts with a "/"
-	if !strings.HasPrefix(name, "/") {
-		name = "/" + name
+	// If a URI is provided, ensure it starts with a "/"
+	if !strings.HasPrefix(URI, "/") {
+		URI = "/" + URI
 	}
 
-	http.HandleFunc(name, returnImage)
+	// Handle requests to the provided URI
+	http.HandleFunc(URI, handler)
+	// If a specific URI is provided, return a 404 to unexpected URI requests
+	if URI != "/" {
+		http.HandleFunc("/", handlerCatchAll)
+	}
 	fmt.Println("[*] Starting web server on port:", port)
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		panic(err)
