@@ -32,8 +32,8 @@ It's up to your creativity as to how you send the URL in a way that it will be o
 
 ### Help
 ```
-$ ./recon-headers -h
-Usage of recon-headers:
+$ ./recon-headers.linux -h
+Usage of recon-headers.linux:
   -ip string
         The local IP address the web server should listen on (default "All interfaces")
   -logfile string
@@ -52,19 +52,19 @@ Usage of recon-headers:
 
 ### Running Example
 ```
-$ ./recon-headers -port 3333 -logfile engagement01.log -uri "/eng01/"
+$ ./recon-headers.linux -port 3333 -logfile engagement01.log -uri "/eng01/"
 [*] Starting web server (:3333)
 ```
 
 ## Binaries
-The 3 binaries in this repo are for x86 Windows, OSX, and Linux. They were built using Docker following the "Building Your Own" section below. You of course only need one of the binaries for whichever OS you'll be running this server on.
+The 3 binaries in this repo are for x86 Windows, OSX, and Linux. They are located in the **bin** directory and were built using Docker following the "Building Your Own" section below. You of course only need one of the binaries for whichever OS you'll be running this server on.
 
 ### File hashes:
 ```
-# md5sum recon-headers.*
-8a38facdd29fe080cd1ad0828eaf7d6f  recon-headers.linux
-dfcc70328e9dce4938dac1f43e31ef06  recon-headers.osx
-1eab99fd79cf0de7a9b8dd3467b5e7d0  recon-headers.win
+# md5sum ./bin/recon-headers.*
+8a38facdd29fe080cd1ad0828eaf7d6f  ./bin/recon-headers.linux
+dfcc70328e9dce4938dac1f43e31ef06  ./bin/recon-headers.osx
+1eab99fd79cf0de7a9b8dd3467b5e7d0  ./bin/recon-headers.win
 ```
 
 ## Building Your Own
@@ -79,11 +79,11 @@ Or, if you prefer to use Docker to build, the following will compile the source 
 ```
 $ docker run --rm -it -v "$PWD":/usr/src/recon-headers -w /usr/src/recon-headers golang:1.10 bash
 
-# GOOS=linux GOARCH=386 go build -v -ldflags "-s -w" -o recon-headers.linux recon-headers.go
+# GOOS=linux GOARCH=386 go build -v -ldflags "-s -w" -o bin/recon-headers.linux recon-headers.go
 
-# GOOS=darwin GOARCH=386 go build -v -ldflags "-s -w" -o recon-headers.osx recon-headers.go
+# GOOS=darwin GOARCH=386 go build -v -ldflags "-s -w" -o bin/recon-headers.osx recon-headers.go
 
-# GOOS=windows GOARCH=386 go build -v -ldflags "-s -w" -o recon-headers.win recon-headers.go
+# GOOS=windows GOARCH=386 go build -v -ldflags "-s -w" -o bin/recon-headers.win recon-headers.go
 ```
 
 ## Why Golang?
