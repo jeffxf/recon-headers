@@ -4,7 +4,7 @@ A web server that replies to requests with a unique png image and logs the detai
 ## Purpose
 There are existing services that provide the capability of tracking when an email you have sent has been opened. One of which is the service MailTracker. These services are great for what they do but aren't really aimed towards recon purposes and can't be self-hosted.
 
-## How To Use:
+## How To Use
 
 Start the web server and come up with URI's to send out. The server will respond with a randomly generated png image to any URI requested. You can take advantage of the wildcard by providing each recipient with a different URI path that identifies each individual. Then wait for requests to the image URI which will be logged to the logfile.
 
