@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-var port, URI, logfile string
+var ip, port, URI, logfile string
 var beginningOfTime = time.Unix(0, 0).Format(time.RFC1123)
 
 // Returns a random int between 0 and 255
@@ -64,7 +64,7 @@ func headerString(r *http.Request) string {
 
 	// Add each header to the buffer
 	for _, header := range sortedHeaders {
-		headers.WriteString(strings.ToLower(header) + ":")
+		headers.WriteString(strconv.Quote(strings.ToLower(header)) + ":")
 		values := strings.Join(r.Header[header], ",")
 		values = strings.Replace(values, `"`, ``, -1)
 		values = strconv.Quote(values)
@@ -100,7 +100,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	w.Write(buffer.Bytes())
 
 	// Log the request data regardless of expecting the requested path
-	log.Printf("%v %v %v %v %v", remoteAddrIP(r), remoteAddrPort(r), 200, r.URL.String(), headerString(r))
+	log.Printf("%v %v %v %v %v", remoteAddrIP(r), remoteAddrPort(r), 200, strconv.Quote(r.URL.String()), headerString(r))
 }
 
 // Replies to an unexpected web request with a 404 and logs request data
@@ -108,11 +108,12 @@ func handlerCatchAll(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(404)
 	fmt.Fprint(w, "404 Not Found")
 	// Log the request data
-	log.Printf("%v %v %v %v %v", remoteAddrIP(r), remoteAddrPort(r), 404, r.URL.String(), headerString(r))
+	log.Printf("%v %v %v %v %v", remoteAddrIP(r), remoteAddrPort(r), 404, strconv.Quote(r.URL.String()), headerString(r))
 }
 
 // handleFlags stores the command line argument options
 func handleFlags() {
+	flag.StringVar(&ip, "ip", "All interfaces", "The local IP address the web server should listen on")
 	flag.StringVar(&port, "port", "8080", "The port number the web server should listen on")
 	flag.StringVar(&URI, "uri", "/", `The URI that returns an image
 Examples:
@@ -144,7 +145,7 @@ func main() {
 	l := setupLogger(logfile)
 	defer l.Close()
 
-	// If a URI is provided, ensure it starts with a "/"
+	//Ensure the URL starts with a "/"
 	if !strings.HasPrefix(URI, "/") {
 		URI = "/" + URI
 	}
@@ -155,8 +156,13 @@ func main() {
 	if URI != "/" {
 		http.HandleFunc("/", handlerCatchAll)
 	}
-	fmt.Println("[*] Starting web server on port:", port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
+
+	// If an IP isn't provided, listen on all interfaces
+	if ip == "All interfaces" {
+		ip = ""
+	}
+	fmt.Printf("[*] Starting web server (%v:%v)", ip, port)
+	if err := http.ListenAndServe(ip+":"+port, nil); err != nil {
 		panic(err)
 	}
 }
