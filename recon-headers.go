@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-var ip, port, URI, logfile string
+var ip, port, uri, logfile string
 var beginningOfTime = time.Unix(0, 0).Format(time.RFC1123)
 
 // Returns a random int between 0 and 255
@@ -111,11 +111,11 @@ func handlerCatchAll(w http.ResponseWriter, r *http.Request) {
 	log.Printf("%v %v %v %v %v", remoteAddrIP(r), remoteAddrPort(r), 404, strconv.Quote(r.URL.String()), headerString(r))
 }
 
-// handleFlags stores the command line argument options
+// Handles command line arguments
 func handleFlags() {
 	flag.StringVar(&ip, "ip", "All interfaces", "The local IP address the web server should listen on")
 	flag.StringVar(&port, "port", "8080", "The port number the web server should listen on")
-	flag.StringVar(&URI, "uri", "/", `The URI that returns an image
+	flag.StringVar(&uri, "uri", "/", `The URI that returns an image
 Examples:
 	"/" 		= 	Respond to any path or file name (wildcard path and file name)
 	"/recon" 	= 	Only respond to exact match of "/recon"
@@ -126,7 +126,7 @@ Examples:
 	flag.Parse()
 }
 
-// setupLogger configures the loggers
+// Configures the logger
 func setupLogger(logfile string) *os.File {
 	// Create log file
 	file, err := os.OpenFile(logfile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
@@ -145,15 +145,15 @@ func main() {
 	l := setupLogger(logfile)
 	defer l.Close()
 
-	//Ensure the URL starts with a "/"
-	if !strings.HasPrefix(URI, "/") {
-		URI = "/" + URI
+	//Ensure the URI starts with a "/"
+	if !strings.HasPrefix(uri, "/") {
+		uri = "/" + uri
 	}
 
 	// Handle requests to the provided URI
-	http.HandleFunc(URI, handler)
+	http.HandleFunc(uri, handler)
 	// If a specific URI is provided, return a 404 to unexpected URI requests
-	if URI != "/" {
+	if uri != "/" {
 		http.HandleFunc("/", handlerCatchAll)
 	}
 
