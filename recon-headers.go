@@ -206,7 +206,7 @@ func main() {
 
 	// Ignore DOS-like requests
 	server := http.Server{
-		Addr:           ip + ":" + port,
+		Addr:           ip + ":" + os.Getenv("PORT"), // For Demo (getenv port)
 		ReadTimeout:    time.Duration(1 * time.Second),
 		WriteTimeout:   time.Duration(1 * time.Second),
 		MaxHeaderBytes: 4096,
