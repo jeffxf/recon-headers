@@ -75,9 +75,9 @@ The 3 binaries in this repo are for x86 Windows, OSX, and Linux. They are locate
 ### File hashes:
 ```
 # md5sum ./bin/recon-headers.*
-8a38facdd29fe080cd1ad0828eaf7d6f  ./bin/recon-headers.linux
-dfcc70328e9dce4938dac1f43e31ef06  ./bin/recon-headers.osx
-1eab99fd79cf0de7a9b8dd3467b5e7d0  ./bin/recon-headers.win
+796a0f1d42b8846ab8bf529c75c45c56  ./bin/recon-headers.linux
+c8fdc8e06a7884f553f064bc4b33bd65  ./bin/recon-headers.osx
+0b308b5747e217e9771003f4777eb573  ./bin/recon-headers.win
 ```
 
 ## Building Your Own

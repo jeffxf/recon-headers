@@ -20,6 +20,8 @@ import (
 
 var ip, port, uri, logfile string
 var beginningOfTime = time.Unix(0, 0).Format(time.RFC1123)
+var timeOut = time.Duration(3 * time.Second)
+var maxSize = 8192 // 8KB
 
 // Returns a random int between 0 and 255
 func randInt255() int {
@@ -101,6 +103,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	// Log the request data regardless of expecting the requested path
 	log.Printf("%v %v %v %v %v", remoteAddrIP(r), remoteAddrPort(r), 200, strconv.Quote(r.URL.String()), headerString(r))
+	return
 }
 
 // Replies to an unexpected web request with a 404 and logs request data
@@ -109,6 +112,7 @@ func handlerCatchAll(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "404 Not Found")
 	// Log the request data
 	log.Printf("%v %v %v %v %v", remoteAddrIP(r), remoteAddrPort(r), 404, strconv.Quote(r.URL.String()), headerString(r))
+	return
 }
 
 // Handles command line arguments
@@ -161,8 +165,17 @@ func main() {
 	if ip == "All interfaces" {
 		ip = ""
 	}
+
+	// Ignore DOS-like requests
+	server := http.Server{
+		Addr:           ip + ":" + port,
+		ReadTimeout:    timeOut,
+		WriteTimeout:   timeOut,
+		MaxHeaderBytes: maxSize,
+	}
+
 	fmt.Printf("[*] Starting web server (%v:%v)", ip, port)
-	if err := http.ListenAndServe(ip+":"+port, nil); err != nil {
+	if err := server.ListenAndServe(); err != nil {
 		panic(err)
 	}
 }
