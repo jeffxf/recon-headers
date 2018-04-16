@@ -100,7 +100,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	w.Write(buffer.Bytes())
 
 	// Log the request data regardless of expecting the requested path
-	log.Printf("%v %v %v %v %v", remoteAddrIP(r), remoteAddrPort(r), 200, strconv.Quote(r.URL.String()), headerString(r))
+	log.Printf("%v %v %v %v %v", "(Src IP Redacted)", remoteAddrPort(r), 200, strconv.Quote(r.URL.String()), headerString(r))
+	return
 }
 
 // Replies to an unexpected web request with a 404 and logs request data
@@ -108,7 +109,42 @@ func handlerCatchAll(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(404)
 	fmt.Fprint(w, "404 Not Found")
 	// Log the request data
-	log.Printf("%v %v %v %v %v", remoteAddrIP(r), remoteAddrPort(r), 404, strconv.Quote(r.URL.String()), headerString(r))
+	log.Printf("%v %v %v %v %v", "(Src IP Redacted)", remoteAddrPort(r), 404, strconv.Quote(r.URL.String()), headerString(r))
+	return
+}
+
+// Demo - display logs
+func handlerDemo(w http.ResponseWriter, r *http.Request) {
+	file, err := os.OpenFile(logfile, os.O_RDONLY, 0644)
+	if err != nil {
+		w.WriteHeader(400)
+		fmt.Fprint(w, "400 Error occurred accessing logs")
+		return
+	}
+	defer file.Close()
+
+	var buffer []byte
+	stat, err := os.Stat(logfile)
+	var start int64
+	if stat.Size() > 20480 {
+		buffer = make([]byte, 20480) // 20KB
+		start = stat.Size() - 20480
+	} else {
+		buffer = make([]byte, stat.Size())
+		start = 0
+	}
+	_, err = file.ReadAt(buffer, start)
+	if err != nil {
+		w.WriteHeader(400)
+		fmt.Fprint(w, "400 Error occurred reading logs")
+		return
+	}
+
+	lines := bytes.Split(buffer, []byte("\n"))
+	linesConcat := bytes.Join(lines[1:len(lines)], []byte("\n\n"))
+	trimmed := bytes.Trim(linesConcat, "\x00")
+
+	w.Write(trimmed)
 }
 
 // Handles command line arguments
@@ -133,6 +169,10 @@ func setupLogger(logfile string) *os.File {
 	if err != nil {
 		fmt.Println("[*] Error creating log file: ", logfile)
 	}
+
+	file.Truncate(0)       // For Demo
+	file.WriteString("\n") // For Demo
+
 	log.SetOutput(file)
 	return file
 }
@@ -150,6 +190,8 @@ func main() {
 		uri = "/" + uri
 	}
 
+	http.HandleFunc("/logs", handlerDemo) // For Demo
+
 	// Handle requests to the provided URI
 	http.HandleFunc(uri, handler)
 	// If a specific URI is provided, return a 404 to unexpected URI requests
@@ -161,8 +203,17 @@ func main() {
 	if ip == "All interfaces" {
 		ip = ""
 	}
+
+	// Ignore DOS-like requests
+	server := http.Server{
+		Addr:           ip + ":" + port,
+		ReadTimeout:    time.Duration(1 * time.Second),
+		WriteTimeout:   time.Duration(1 * time.Second),
+		MaxHeaderBytes: 4096,
+	}
+
 	fmt.Printf("[*] Starting web server (%v:%v)", ip, port)
-	if err := http.ListenAndServe(ip+":"+port, nil); err != nil {
+	if err := server.ListenAndServe(); err != nil {
 		panic(err)
 	}
 }
