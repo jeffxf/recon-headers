@@ -1,14 +1,27 @@
 # recon-headers
-A web server that replies to requests with a unique png image and logs the details of every request. 
+A web server that replies to requests with a unique png image and logs the details of every request.
+
+Jeff Ferrell (@jeffxf)  
+Garrett Whittaker
 
 ## Purpose
-There are existing services that provide the capability of tracking when an email you have sent has been opened. One of which is the service MailTracker. These services are great for what they do but aren't really aimed towards recon purposes and can't be self-hosted.
+This was put together for active recon purposes during a pentest engagement to gather info such as someone's IP address, user agent (depends on the software they use to load the image), and track who's opened a document or email. 
+
+There are existing services that provide the capability of tracking when an email you have sent has been opened. One of which is the service MailTracker. These services are great for what they do but aren't really aimed towards recon purposes and can't be self-hosted. Also, those services typically use static known-hashed images such as 1x1.png which you can see the negative community score and tracker relationships of here: https://www.virustotal.com/#/file/3eb10792d1f0c7e07e7248273540f1952d9a5a2996f4b5df70ab026cd9f05517/detection)
 
 ## How To Use
 
-Start the web server and come up with URI's to send out. The server will respond with a randomly generated png image to any URI requested. You can take advantage of the wildcard by providing each recipient with a different URI path that identifies each individual. Then wait for requests to the image URI which will be logged to the logfile.
+Start the web server and come up with URI's to send out. The server will respond with a randomly generated png image to any URI requested. You can take advantage of the wildcard by providing each recipient a different URI path that identifies each individual. Then wait for requests to the image URI which will be logged to the logfile.
 
 It's up to your creativity as to how you send the URL in a way that it will be opened by the recipient. Examples could be an email or word document with an image attached using the URL. When the email or word doc is opened, their host will make a request to the URL to get the image. The generated images are almost completely transparent and relatively small so the recipient shouldn't notice it.
+
+## Demo / Example
+
+A demo is running at: https://recon-headers.herokuapp.com/ (Thanks Heroku). Just append whatever URI you want after the domain and it will respond with a random png while logging the request.
+
+A page was setup to tail the most recent (ip redacted) logs at: https://recon-headers.herokuapp.com/logs
+
+Additionally, there is a word document in the **examples/** directory that will load an image from https://recon-headers.herokuapp.com/example.png when opened.
 
 ## Features
 
@@ -88,7 +101,7 @@ $ docker run --rm -it -v "$PWD":/usr/src/recon-headers -w /usr/src/recon-headers
 
 ## Why Golang?
 
-I've been using go a lot recently and enjoy it so here we are. I understand you probably would rather this be written using an interpreted lanuage like python. A few reasons could be:
+I've been using go a lot recently and enjoy it, so here we are. I understand you probably would rather this be written using an interpreted lanuage like python. A few reasons could be:
 
 - Easier to modify a python script and quickly run it without having to install go and recompile
     - I agree and might write this in python as well if I get around to it since it shouldn't take long at all. (But also, building in docker instead of installing go locally is super easy...)
