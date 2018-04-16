@@ -58,10 +58,9 @@ func headerString(r *http.Request) string {
 	// Sort the Headers
 	var sortedHeaders []string
 	for k := range r.Header {
-		if strings.HasPrefix(k, "x-") { // For Demo
-			continue
+		if !strings.HasPrefix(k, "x-") { // For Demo
+			sortedHeaders = append(sortedHeaders, k)
 		}
-		sortedHeaders = append(sortedHeaders, k)
 	}
 	sort.Strings(sortedHeaders)
 
