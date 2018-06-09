@@ -1,6 +1,8 @@
 # recon-headers
 
 [![Join the chat at https://gitter.im/recon-headers/Lobby](https://badges.gitter.im/recon-headers/Lobby.svg)](https://gitter.im/recon-headers/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Go Report Card](https://goreportcard.com/badge/github.com/jeffxf/recon-headers)](https://goreportcard.com/badge/github.com/jeffxf/recon-headers)
+
 
 A web server that replies to requests with a unique png image and logs the details of every request.
 
@@ -16,13 +18,13 @@ There are existing services that provide the capability of tracking when an emai
 
 Start the web server and come up with URI's to send out. The server will respond with a randomly generated png image to any URI requested. You can take advantage of the wildcard by providing each recipient a different URI path that identifies each individual. Then wait for requests to the image URI which will be logged to the logfile.
 
-It's up to your creativity as to how you send the URL in a way that it will be opened by the recipient. Examples could be an email or word document with an image attached using the URL. When the email or word doc is opened, their host will make a request to the URL to get the image. The generated images are almost completely transparent and relatively small so the recipient shouldn't notice it.
+It's up to your creativity as to how you send the URI in a way that it will be opened by the recipient. Examples could be an email or word document with an image attached using the URI. When the email or word doc is opened, their host will make a request to the URI to get the image. The generated images are almost completely transparent and relatively small so the recipient shouldn't notice it.
 
 ## Demo / Example
 
 A demo is running at: https://recon-headers.herokuapp.com/ (Thanks Heroku). Just append whatever URI you want after the domain and it will respond with a random png while logging the request.
 
-A page was setup to tail the most recent (ip redacted) logs at: https://recon-headers.herokuapp.com/logs
+A page was setup to tail the most recent (IP redacted) logs at: https://recon-headers.herokuapp.com/logs
 
 Additionally, there is a word document in the **examples/** directory that will load an image from https://recon-headers.herokuapp.com/example.png when opened.
 
@@ -73,7 +75,7 @@ $ ./recon-headers.linux -port 3333 -logfile engagement01.log -uri "/eng01/"
 ```
 
 ## Binaries
-The 3 binaries in this repo are for x86 Windows, OSX, and Linux. They are located in the **bin** directory and were built using Docker following the "Building Your Own" section below. You of course only need one of the binaries for whichever OS you'll be running this server on.
+The 3 binaries in this repo are for x86 Windows, OSX, and Linux. They are located in the **bin/** directory and were built using Docker following the "Building Your Own" section below. You of course only need one of the binaries for whichever OS you'll be running this server on.
 
 ### File hashes:
 ```
