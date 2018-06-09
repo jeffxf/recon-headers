@@ -1,7 +1,7 @@
 # recon-headers
 
 [![Join the chat at https://gitter.im/recon-headers/Lobby](https://badges.gitter.im/recon-headers/Lobby.svg)](https://gitter.im/recon-headers/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Go Report Card](https://goreportcard.com/badge/github.com/jeffxf/recon-headers)](https://goreportcard.com/badge/github.com/jeffxf/recon-headers)
+[![Go Report Card](https://goreportcard.com/badge/github.com/jeffxf/recon-headers)](https://goreportcard.com/report/github.com/jeffxf/recon-headers)
 
 
 A web server that replies to requests with a unique png image and logs the details of every request.
